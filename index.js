@@ -11,6 +11,8 @@ module.exports.streambotBackup = streambot(incrementalBackup);
 
 function replicate(event, context, callback) {
     var replicaConfig = {
+        accessKeyId: process.env.ReplicaAccessKeyId || undefined,
+        secretAccessKey: process.env.ReplicaSecretAccessKey || undefined,
         table: process.env.ReplicaTable,
         region: process.env.ReplicaRegion,
         maxRetries: 1000,
@@ -47,7 +49,7 @@ function replicate(event, context, callback) {
 
     (function batchWrite(requestSet, attempts) {
         requestSet.forEach(function(req) {
-            req.on('retry', function(res) {
+            if (req) req.on('retry', function(res) {
                 if (!res.error || !res.httpResponse || !res.httpResponse.headers) return;
                 if (res.error.name === 'TimeoutError') res.error.retryable = true;
                 console.log(
