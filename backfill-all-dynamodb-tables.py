@@ -1,7 +1,6 @@
 #!/bin/env python
 from __future__ import print_function  # Python 2/3 compatibility
 import boto3
-import json
 import argparse
 import pprint
 import subprocess
@@ -25,9 +24,6 @@ mytables = ddb.list_tables()
 print("Backfilling " + str(len(mytables['TableNames'])) +
       " tables into s3://" + str('s3://' + args.S3Bucket + '/' + args.S3Prefix))
 
-# Dict for stripping control characters to get rate
-stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
-
 for table in mytables['TableNames']:
     print(table, end=': ')
     myproc = subprocess.Popen(['/usr/local/bin/incremental-backfill',
@@ -38,5 +34,5 @@ for table in mytables['TableNames']:
     if len(stderr) > 0:
         print('ERROR:' + str(pp.pprint(stderr)))
     else:
-        print('SUCCESS: Rows ' + stdout.rsplit('\r\x1b[K', 1)[1])
+        print('SUCCESS: Rows: ' + stdout.rsplit('\r\x1b[K', 1)[1])
 
